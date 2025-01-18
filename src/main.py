@@ -9,7 +9,7 @@
 
 from vex import *
 brain=Brain()
-controller = Controller()
+controller = Controller()  
 
 DriveLU = Motor(Ports.PORT20, True)
 DriveLD = Motor(Ports.PORT11, True)
@@ -20,8 +20,8 @@ DriveRight = MotorGroup(DriveRD,DriveRU)
 intakeL = Motor(Ports.PORT2, True)
 intakeR = Motor(Ports.PORT5)
 intake = MotorGroup(intakeL, intakeR)
-armR = Motor(Ports.PORT12)
-armL = Motor(Ports.PORT3, True)
+armR = Motor(Ports.PORT12,True)
+armL = Motor(Ports.PORT3)
 arm = MotorGroup(armR, armL)
 inertial = Inertial(Ports.PORT13)
 
@@ -48,15 +48,6 @@ def motorInit():
     brain.screen.clear_screen()
     brain.screen.draw_rectangle(0,0,479,239,Color.RED)
     brain.screen.set_cursor(1,1)
-    brain.screen.print("calibrating inertial")
-    inertial.calibrate()
-    while inertial.is_calibrating():
-        sleep(5)
-    brain.screen.clear_screen()
-    brain.screen.draw_rectangle(0,0,479,239,Color.RED)
-    brain.screen.set_cursor(1,1)
-    brain.screen.print("waiting for auton")   
-    inertial.set_rotation(0)
 
     wait(5)
 
@@ -91,7 +82,16 @@ def motorInit():
 
     color.set_light(LedStateType.ON)
 
-motorInit()
+def calibrate_thingy():
+    brain.screen.print("calibrating inertial")
+    inertial.calibrate()
+    while inertial.is_calibrating():
+        sleep(5)
+    brain.screen.clear_screen()
+    brain.screen.draw_rectangle(0,0,479,239,Color.RED)
+    brain.screen.set_cursor(1,1)
+    brain.screen.print("waiting for auton")   
+    inertial.set_rotation(0)
 
 
 
@@ -182,14 +182,14 @@ def PID_Drive(inches, turngoal, V_MX_MAG=60, kp=0.35, kd=0.3, ki=0.01, timeout_f
         # brain.screen.print("e:{0:.1f},d:{1:.1f}".format(error, Derror))
         # brain.screen.set_cursor(2, 1)
         # brain.screen.print("I:{0:.1f},t:{1:.1f}".format(Ierror, brain.timer.time(SECONDS)))
-        # print("-------------")
-        # print("dis:{0:.1f},c:{1:.1f}".format(Distance_DEG, current_pos_DEG))
-        # print("e:{0:.1f},d:{1:.1f}".format(error, Derror))
-        # print("I:{0:.1f},t:{1:.1f}".format(Ierror, brain.timer.time(MSEC)))
-        # print("L:{0:.1f},R:{1:.1f}".format(Lpos, Rpos))
-        # print("FLV:{0:.1f}".format(final_lv))
-        # print("OV:{0:.1f}".format(velocity))
-        # print("loop:{}".format(loop))
+        print("-------------")
+        print("dis:{0:.1f},c:{1:.1f}".format(Distance_DEG, current_pos_DEG))
+        print("e:{0:.1f},d:{1:.1f}".format(error, Derror))
+        print("I:{0:.1f},t:{1:.1f}".format(Ierror, brain.timer.time(MSEC)))
+        print("L:{0:.1f},R:{1:.1f}".format(Lpos, Rpos))
+        print("FLV:{0:.1f}".format(final_lv))
+        print("OV:{0:.1f}".format(velocity))
+        print("loop:{}".format(loop))
         # print("{0:.1f},{1:.1f},{2:.1f},{3:.1f},{4:.1f},{5:.1f}".format(final_lv,error, current_pos_DEG,brain.timer.time(MSEC),inertial.acceleration(YAXIS),current_dir_DEG))
         # print("{0:.1f},{1:.1f},{2:.1f},{3:.1f},{4:.1f},{5:.1f},{6:.1f}".format(lv,turnError, velocity,DturnError,current_dir_DEG,final_lv, final_rv))
         # print("turngoal:{0:.1f},tc:{1:.1f}".format(turngoal, current_dir_DEG))
@@ -258,51 +258,73 @@ def PID_Turn(degrees, kp=0.8, kd=0.9, ki=0.01, runtime=5, err_th=2, V_TH=3):
     brain.timer.clear()
     print("-=-=End Turn=-=-")
 
-def TestMain():
-    intake.spin(FORWARD)
-    wait(1, SECONDS)
-    intake.stop   
-    PID_Drive(15, 0, 40)
-    PID_Turn(-90)
-    PID_Drive(-24, -90, 25)
-    wait(0.5, SECONDS)
-    clamp.set(True)
-    PID_Turn(0)
-    PID_Drive(23.75, 0, 27)
-    PID_Turn(90)
-    PID_Drive(23, 90, 27)
-    PID_Turn(180)
-    PID_Drive(18.5, 180, 35)
-    wait(0.75, SECONDS)
-    PID_Drive(15.5, 180, 35)
-    PID_Turn(65)
-    PID_Drive(4, 65, 60)
-    wait(0.55, SECONDS)   
-    PID_Turn(-65)
-    PID_Drive(-5.65, -35, 60)
-    wait(0.15, SECONDS)
-    clamp.set(False)
-    wait(0.35, SECONDS)
-TestMain()
 
+def user_control():
+    return
+    
 def autonomous():
+    calibrate_thingy()
     brain.screen.clear_screen()
     brain.screen.print("autonomous code")
     # place automonous code here
     # intake.spin(FORWARD)
     # intake.set_velocity(100, PERCENT)
     # wait(1, SECONDS)
-    PID_Drive(10, 0, 40)
+    # intake.spin(FORWARD)
+    # wait(1, SECONDS)
+    # intake.stop   
+    # PID_Drive(13.5, 0, 40)
+    PID_Turn(-90)
+    print("autoEnd")
+    return   
+    print("return")
+    # PID_Drive(-24, -90, 25)
+    # wait(0.5, SECONDS)
+    # clamp.set(True)
+    # PID_Turn(0)
+    # PID_Drive(23.75, 0, 27)
+    # PID_Turn(90)
+    # PID_Drive(23, 90, 27)
+    # PID_Turn(180)
+    # PID_Drive(18.5, 180, 35)
+    # wait(0.75, SECONDS)
+    # PID_Drive(15.5, 180, 35)
+    # PID_Turn(57.5)
+    # PID_Drive(4.25, 57.5, 60)
+    # wait(0.55, SECONDS)   
+    # PID_Turn(-48.5)
+    # PID_Drive(-6, -48.5, 30)
+    # wait(0.15, SECONDS)
+    # clamp.set(False)
+    # wait(0.35, SECONDS)
+    # PID_Drive(16, -48.5, 50)
+    # PID_Turn(90)
+    # PID_Drive(-67.5, 90, 55)
+    # clamp.set(True)
+    # wait(0.35, SECONDS)
+    # PID_Turn(0)
+    # PID_Drive(23, 0, 32)
+    # PID_Turn(-90)
+    # PID_Drive(24.85, -90, 32)
+    # PID_Turn(-180)
+    # PID_Drive(21.5, -180, 32)
+    # wait(0.75, SECONDS) 
+    # PID_Drive(10, -180, 35)
+    # PID_Drive(-22.5, -180, 35)
+    # PID_Turn(-145)
+    # PID_Drive(7, -145, 37)
+    # wait(0.5, SECONDS)
+    # PID_Drive(-4, -145, 37)
+    # PID_Turn(28)
+    # PID_Drive(-28.5, 28, 25)
+    # wait(0.15, SECONDS)
+    # clamp.set(False)
+    # wait(0.35, SECONDS)
 
-def user_control():
-    brain.screen.clear_screen()
-    brain.screen.print("driver control")
-    # place driver control in this while loop
-    while True:
-        wait(20, MSEC)
 
 # create competition instance
-# comp = Competition(user_control, autonomous)
+comp = Competition(user_control, autonomous)
 
 # actions to do when the program starts
 
+motorInit()
